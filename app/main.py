@@ -10,7 +10,6 @@ from highlight import find_highlight_segment
 from subtitles import generate_subtitles_for_segment
 from formatter import create_short, create_short_no_subtitles
 from uploader import upload_video, setup_credentials, check_credentials_status
-from downloader import get_cookie_options
 from downloader import download_popular_videos, download_trending_videos, download_video_from_url
 
 INPUT_DIR = "input_videos"
@@ -44,9 +43,9 @@ def generate_title(filename):
     base = os.path.splitext(os.path.basename(filename))[0]
     variants = [
         f"{base} 🤯",
-        f"You Won’t Believe This...",
-        f"This Changed Everything",
-        f"Wait For It...",
+        f"{base} You Won’t Believe This...",
+        f"{base} This Changed Everything",
+        f"{base} Wait For It...",
         f"{base} (Insane Moment)"
     ]
     return random.choice(variants)
@@ -86,7 +85,6 @@ def process_video(video_path):
                 output=output_path
             )
         else:
-            # Create short without subtitles
             create_short_no_subtitles(
                 input_video=video_path,
                 start=start,
@@ -95,12 +93,12 @@ def process_video(video_path):
             )
 
         # Clean up temp files immediately after video creation
-        cleanup_temp_files(audio_path, srt_path)  # srt_path may not exist, but cleanup handles that
+        cleanup_temp_files(audio_path, srt_path)
 
-        # 5️⃣ Upload (optional - continue even if upload fails)
+        # 5️⃣ Upload
         title = generate_title(video_path)
+        uploaded_successfully = False  # Track upload status
         try:
-            # Check credentials status
             cred_status = check_credentials_status()
             if not cred_status['valid']:
                 print(f"YouTube Upload: {cred_status['message']}")
@@ -109,29 +107,37 @@ def process_video(video_path):
                 upload_video(
                     file_path=output_path,
                     title=title,
-                    description="Automated highlight clip",
+                    description="Highlights of the week! #shorts #highlight",
                     tags=["shorts", "highlight"],
                     privacy_status="public",
                     publish_in_hours=SCHEDULE_HOURS_AHEAD
                 )
                 print("Video uploaded successfully.")
+                uploaded_successfully = True
         except Exception as upload_error:
             print(f"Upload failed (video still saved): {upload_error}")
             if "credentials" in str(upload_error).lower() or "auth" in str(upload_error).lower():
                 print("Tip: Run 'python app/main.py --setup-credentials' to set up YouTube API access")
 
-        # 6️⃣ Move original to processed (always happens, even if upload fails)
-        shutil.move(
-            video_path,
-            os.path.join(PROCESSED_DIR, os.path.basename(video_path))
-        )
+        # 6️⃣ Move original video to processed only if not uploaded
+        if not uploaded_successfully:
+            shutil.move(
+                video_path,
+                os.path.join(PROCESSED_DIR, os.path.basename(video_path))
+            )
+            print("Original video moved to processed folder.")
+
+        # 7️⃣ Delete output short and original video if uploaded successfully
+        if uploaded_successfully:
+            cleanup_temp_files(video_path, output_path)
+            print("Deleted original and output video after successful upload.")
 
         print("Processing complete.")
 
     except Exception as e:
         print(f"Error processing {video_path}: {e}")
-        # Clean up temp files even on error
         cleanup_temp_files(audio_path, srt_path)
+
 
 
 def cleanup_temp_files(*files):
@@ -149,7 +155,6 @@ def main():
     parser.add_argument('--process', action='store_true', help='Process existing videos in input_videos folder')
     parser.add_argument('--setup-credentials', action='store_true', help='Set up YouTube API credentials for automated uploads')
     parser.add_argument('--check-credentials', action='store_true', help='Check YouTube API credentials status')
-    parser.add_argument('--check-cookies', action='store_true', help='Check YouTube cookie setup for age-restricted videos')
 
     args = parser.parse_args()
 
@@ -166,21 +171,6 @@ def main():
         status = check_credentials_status()
         print(f"YouTube Credentials Status: {'✅ Valid' if status['valid'] else '❌ Invalid'}")
         print(f"Message: {status['message']}")
-        return
-
-    if args.check_cookies:
-        print("Checking YouTube cookie setup...")
-        cookie_opts = get_cookie_options()
-        if 'cookiefile' in cookie_opts:
-            print("✅ Cookies configured: Using cookies.txt file")
-            print(f"   File: cookies/cookies.txt")
-        elif 'cookiesfrombrowser' in cookie_opts:
-            browser = cookie_opts['cookiesfrombrowser'][0]
-            print(f"✅ Cookies configured: Using {browser} browser cookies")
-        else:
-            print("❌ No cookies configured")
-            print("   Age-restricted videos may fail to download")
-            print("   See COOKIES_SETUP.md for setup instructions")
         return
 
     # Handle downloading
