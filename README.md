@@ -98,9 +98,6 @@ The downloader automatically filters videos to ensure they're suitable for short
 ## Processing Features
 
 - **Smart Subtitles**: Uses Whisper AI for transcription of highlight segments only (not entire video)
-- **Precise Timing**: Subtitles are adjusted to match the short's timeline (start from 0)
-- **Concise Text**: Subtitle text is cleaned and broken into 3-5 word chunks for better readability
-- **Styled Subtitles**: White text with black outline, Arial font, size 24, centered positioning
 - **Highlight Detection**: Automatically finds engaging segments using audio analysis
 - **Vertical Formatting**: Converts to 9:16 aspect ratio for YouTube Shorts
 - **Error Recovery**: Continues processing even if upload or subtitle generation fails
@@ -111,14 +108,3 @@ The downloader automatically filters videos to ensure they're suitable for short
 - **Whisper Model**: Currently uses 'tiny' model for fast transcription. Change to 'base', 'small', 'medium', or 'large' in `app/subtitles.py` for better accuracy (but slower processing)
 - **Disk Space**: Ensure adequate disk space (videos can generate large temporary WAV files)
 - **CPU/GPU**: Whisper transcription runs on CPU by default. GPU acceleration can be enabled for faster processing
-
-## Troubleshooting
-
-- **"Unable to open *.srt"**: Fixed by proper path formatting for FFmpeg subtitles filter
-- **"No videos found"**: Duration filter was too restrictive; now accepts 30 seconds to 20 minutes
-- **Subtitles don't match content**: Fixed - now generates subtitles only for the highlight segment with correct timing
-- **Subtitles too long/ugly**: Fixed - text is broken into 3-5 word chunks with white text, black outline, and Arial font
-- **Disk Space Issues**: Temp files are cleaned up immediately after video creation
-- **Subtitle Generation Slow/Fails**: Subtitles are now optional; processing continues without them
-- **Upload Fails**: Videos are still moved to processed folder even if upload fails
-- **Trending Videos Not Found**: Uses search-based approach instead of direct trending URL
