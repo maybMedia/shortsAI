@@ -10,6 +10,7 @@ from highlight import find_highlight_segment
 from subtitles import generate_subtitles_for_segment
 from formatter import create_short, create_short_no_subtitles
 from uploader import upload_video, setup_credentials, check_credentials_status
+from downloader import get_cookie_options
 from downloader import download_popular_videos, download_trending_videos, download_video_from_url
 
 INPUT_DIR = "input_videos"
@@ -148,6 +149,7 @@ def main():
     parser.add_argument('--process', action='store_true', help='Process existing videos in input_videos folder')
     parser.add_argument('--setup-credentials', action='store_true', help='Set up YouTube API credentials for automated uploads')
     parser.add_argument('--check-credentials', action='store_true', help='Check YouTube API credentials status')
+    parser.add_argument('--check-cookies', action='store_true', help='Check YouTube cookie setup for age-restricted videos')
 
     args = parser.parse_args()
 
@@ -164,6 +166,21 @@ def main():
         status = check_credentials_status()
         print(f"YouTube Credentials Status: {'✅ Valid' if status['valid'] else '❌ Invalid'}")
         print(f"Message: {status['message']}")
+        return
+
+    if args.check_cookies:
+        print("Checking YouTube cookie setup...")
+        cookie_opts = get_cookie_options()
+        if 'cookiefile' in cookie_opts:
+            print("✅ Cookies configured: Using cookies.txt file")
+            print(f"   File: cookies/cookies.txt")
+        elif 'cookiesfrombrowser' in cookie_opts:
+            browser = cookie_opts['cookiesfrombrowser'][0]
+            print(f"✅ Cookies configured: Using {browser} browser cookies")
+        else:
+            print("❌ No cookies configured")
+            print("   Age-restricted videos may fail to download")
+            print("   See COOKIES_SETUP.md for setup instructions")
         return
 
     # Handle downloading
