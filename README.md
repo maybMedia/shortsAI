@@ -92,10 +92,8 @@ Edit the constants in `app/main.py`:
 
 The downloader automatically filters videos to ensure they're suitable for shorts creation:
 
-- **Duration**: 30 seconds to 20 minutes (relaxed from previous 1-10 minutes for better video discovery)
-- **Format**: MP4 videos at 720p or lower for efficient processing
-- **Content**: Excludes live streams
-- **Topic-Specific Search**: Adds "tutorial" to cooking/recipe searches for better results
+- **Duration**: 30 seconds to 20 minutes
+- **Format**: MP4 videos at 1080p or lower for efficient processing
 
 ## Processing Features
 
