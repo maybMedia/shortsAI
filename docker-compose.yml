@@ -1,0 +1,8 @@
+version: '3'
+services:
+  shorts-bot:
+    build: .
+    volumes:
+      - ./input_videos:/app/input_videos
+      - ./output_shorts:/app/output_shorts
+      - ./credentials:/app/credentials
