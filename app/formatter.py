@@ -11,8 +11,7 @@ def create_short(input_video, start, duration, subtitles, output):
     subtitle_style = (
         "force_style='FontName=Montserrat Bold,FontSize=16,"
         "PrimaryColour=&HFFFFFF,OutlineColour=&H000000,"
-        "BorderStyle=1,Outline=1,Alignment=2,MarginV=60'"
-        "Spacing=-1.0"
+        "BorderStyle=1,Outline=1,Alignment=2,MarginV=40,Spacing=-1.0'"
     )
 
     filter_complex = (
